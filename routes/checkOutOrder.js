@@ -44,4 +44,21 @@ module.exports = server => {
       }
     }
   });
+
+  // search checkoutorder
+  server.get("/checkOutOrder/:id", async (req, res, next) => {
+    try {
+      const checkOutOrder = await CheckOutOrder.findById(req.params.id);
+      res.send(checkOutOrder);
+      next();
+    } catch (error) {
+      return next(
+        new errors.ResourceNotFoundError(
+          `The id ${
+            req.params.id
+          } either outdated or not found on server, please check your id.`
+        )
+      );
+    }
+  });
 };
