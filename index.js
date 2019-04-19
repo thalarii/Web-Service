@@ -19,5 +19,6 @@ const db = mongoose.connection;
 db.on("error", err => console.log(err));
 
 db.once("open", () => {
+  require("./routes/checkOutOrder")(server);
   console.log(`Server started on port ${config.PORT}`);
 });
