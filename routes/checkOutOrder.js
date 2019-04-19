@@ -61,4 +61,30 @@ module.exports = server => {
       );
     }
   });
+  
+  // update is_purchased attribute of a given element
+  server.put("/checkOutOrder/:id", async (req, res, next) => {
+    // Check for JSON
+    if (!req.is("application/json")) {
+      return next(new errors.InvalidContentError("Expects 'application/json"));
+    }
+
+    try {
+      const checkOutOrder = await CheckOutOrder.findOneAndUpdate(
+        { _id: req.params.id },
+        req.body
+      );
+      res.send(200);
+      next();
+    } catch (err) {
+      return next(
+        new errors.ResourceNotFoundError(
+          `The id ${
+            req.params.id
+          } either outdated or not found on server, please check your id.`
+        )
+      );
+    }
+  });
+  
 };
