@@ -26,18 +26,19 @@ module.exports = server => {
     }
 
     if (account.owner_name == "" || account.account_number == "") {
+      return next(new errors.InvalidContentError("Account unverified"));
     }
-    console.log(invalidAttriutes);
+    // console.log(invalidAttriutes);
 
     const checkOutOrder = new CheckOutOrder({
       items,
       account,
       is_purchased: false
     });
-    if (invalidAttriutes.length > 0) {
+    if (invalidAttriutes.length == 0) {
       try {
         const newCheckOutOrder = await checkOutOrder.save();
-        res.send(unique_id);
+        res.send(newCheckOutOrder._id);
         next();
       } catch (err) {
         return next(new errors.InternalError(err.message));
@@ -61,7 +62,7 @@ module.exports = server => {
       );
     }
   });
-  
+
   // update is_purchased attribute of a given element
   server.put("/checkOutOrder/:id", async (req, res, next) => {
     // Check for JSON
@@ -86,5 +87,4 @@ module.exports = server => {
       );
     }
   });
-  
 };
