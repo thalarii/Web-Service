@@ -18,6 +18,7 @@ server.use(restify.plugins.bodyParser());
 
 server.listen(config.PORT, () => {
     require('./routes/addCheckOutOrder')(server);
+    require('./firebase')(server);
     console.log(`Server started on port ${config.PORT}`);
 
 });
