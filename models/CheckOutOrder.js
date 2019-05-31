@@ -1,35 +1,82 @@
-const mongoose = require("mongoose");
+const errors = require('restify-errors');
+var admin = require("firebase-admin");
 
-let Schema = mongoose.Schema;
-const CheckOutOrderSchema = new Schema({
-  items: [
-    {
-      item_name: {
-        type: String
-      },
-      item_price: {
-        type: String
-      },
-      item_quantity: {
-        type: String
-      },
-      item_image_link: {
-        type: String
+var db = admin.database();
+var ref = db.ref("customer");
+module.exports = server => {
+server.post(
+    '/customers',
+    // rjwt({ secret: config.JWT_SECRET }),
+    async (req, res, next) => {
+      // Check for JSON
+      if (!req.is('application/json')) {
+        return next(
+          new errors.InvalidContentError("Expects 'application/json'")
+        );
+      }
+
+      const { 
+        items:{
+          item_name,
+          item_price,
+          item_quality,
+          item_image_link
+        },
+        owner:{
+          owner_name,
+          owner_account
+        },
+        isPurchased
+       } = req.body;
+      var usersRef = ref.child("1");
+    usersRef.set({
+    items: {
+        item_name,
+        item_price,
+        item_quality,
+        item_image_link
+    },
+    owner: {
+        owner_name,
+        owner_account
+    },
+    isPurchased
+    });
+      try {
+        // const newCustomer = await customer.save();
+        
+        res.send(201);
+        next();
+      } catch (err) {
+        return next(new errors.InternalError(err.message));
       }
     }
-  ],
-  account: {
-    owner_name: {
-      type: String
-    },
-    owner_logo_link: {
-      type: String
-    },
-    account_number: {
-      type: String
+  );
+  
+  server.put(
+    '/customers',
+    // rjwt({ secret: config.JWT_SECRET }),
+    async (req, res, next) => {
+      // Check for JSON
+      if (!req.is('application/json')) {
+        return next(
+          new errors.InvalidContentError("Expects 'application/json'")
+        );
+      }
+
+      const { 
+        isPurchased
+       } = req.body;
+var usersRef = ref.child("1");
+    usersRef.set({
+    isPurchased
+    });
+      try {
+           res.send(201);
+        next();
+      } catch (err) {
+        return next(new errors.InternalError(err.message));
+      }
     }
-  },
-  is_purchased: Boolean
-});
-const CheckOutOrder = mongoose.model("CheckOutOrder", CheckOutOrderSchema);
-module.exports = CheckOutOrder;
+  );
+};
