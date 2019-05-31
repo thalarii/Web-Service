@@ -1,33 +1,23 @@
-const restify = require("restify");
-const mongoose = require("mongoose");
-const config = require("./config");
-const rjwt = require("restify-jwt-community");
+var admin = require("firebase-admin");
+const restify = require('restify');
+const config = require('./config');
 
 const server = restify.createServer();
+var serviceAccount = require("./addcheckoutorders-firebase-adminsdk-7yjri-c14fda13d3.json");
 
-//Middleware
-server.use(restify.plugins.bodyParser());
-server.use(restify.plugins.queryParser());
-
-server.use(
-  rjwt({ secret: config.JWT_SECRET }).unless({
-    path: ["/auth", "/register"]
-  })
-);
-
-
-server.listen(config.PORT, () => {
-  mongoose.set("useFindAndModify", false);
-  mongoose.connect(config.MONGODB_URI, {
-    useNewUrlParser: true
-  });
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://addcheckoutorders.firebaseio.com"
 });
 
-const db = mongoose.connection;
-db.on("error", err => console.log(err));
+// Middleware
+server.use(restify.plugins.bodyParser());
 
-db.once("open", () => {
-  require("./routes/checkOutOrder")(server);
-  require("./routes/users")(server);
-  console.log(`Server started on port ${config.PORT}`);
+// Protect Routes
+// server.use(rjwt({ secret: config.JWT_SECRET }).unless({ path: ['/auth'] }));
+
+server.listen(config.PORT, () => {
+    require('./routes/addCheckOutOrder')(server);
+    console.log(`Server started on port ${config.PORT}`);
+
 });
